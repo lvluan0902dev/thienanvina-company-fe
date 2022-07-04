@@ -1,0 +1,215 @@
+<div class="content-wrapper">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Danh sách Đơn hàng</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="javascript:;">Cửa hàng</a></li>
+                        <li class="breadcrumb-item active">Đơn hàng</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="content">
+        <div class="card">
+            <p-toolbar styleClass="mb-4">
+                <ng-template pTemplate="left">
+                </ng-template>
+                <ng-template pTemplate="right">
+                    <span class="p-input-icon-left ml-auto">
+                        <i class="pi pi-search"></i>
+                        <input pInputText type="text" #input (input)="dt.filterGlobal(input.value, 'contains')"
+                            placeholder="Tìm kiếm" />
+                    </span>
+                </ng-template>
+            </p-toolbar>
+            <p-table [value]="orders" dataKey="code" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" #dt
+                responsiveLayout="scroll"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                [rowsPerPageOptions]="[10,25,50]" [globalFilterFields]='["code", "name", "note", "created_at", "mobile", "address", "note", "bill_of_lading_no"]'>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width: 3rem"></th>
+                        <th pSortableColumn="code">MĐH <p-sortIcon field="code"></p-sortIcon>
+                        </th>
+                        <th pSortableColumn="shipping_unit_id">ĐVVC <p-sortIcon field="shipping_unit_id"></p-sortIcon>
+                        </th>
+                        <th pSortableColumn="bill_of_lading_no">MVĐ <p-sortIcon field="bill_of_lading_no"></p-sortIcon>
+                        </th>
+                        <th pSortableColumn="name">Tên khách hàng <p-sortIcon field="name"></p-sortIcon>
+                        </th>
+                        <th pSortableColumn="mobile">Số điện thoại <p-sortIcon field="mobile"></p-sortIcon>
+                        </th>
+                        <th pSortableColumn="address">Địa chỉ <p-sortIcon field="address"></p-sortIcon>
+                        </th>
+                        <th pSortableColumn="note">Ghi chú <p-sortIcon field="note"></p-sortIcon>
+                        </th>
+                        <th pSortableColumn="order.payment">Thanh toán <p-sortIcon field="order.payment"></p-sortIcon>
+                        </th>
+                        <th pSortableColumn="order_status.content">Trạng thái <p-sortIcon field="order_status.content"></p-sortIcon>
+                        </th>
+                        <th pSortableColumn="created_at">Thời gian <p-sortIcon field="created_at"></p-sortIcon>
+                        </th>
+                        <th>Hành động</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-order let-i="rowIndex" let-expanded="expanded">
+                    <tr>
+                        <td>
+                            <button type="button" pButton pRipple [pRowToggler]="order" class="p-button-text p-button-rounded p-button-plain" [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></button>
+                        </td>
+                        <td>
+                            {{order.code}}
+                        </td>
+                        <td>
+                            <div *ngIf="isEmptyObject(order.shipping_unit) === false; then hasShippingUnit; else noShippingUnit"></div>
+                            <ng-template #hasShippingUnit>
+                                {{order.shipping_unit.name}}
+                            </ng-template>
+                            <ng-template #noShippingUnit></ng-template>
+                        </td>
+                        <td>
+                            {{order.bill_of_lading_no}}
+                        </td>
+                        <td>{{order.name}}</td>
+                        <td>{{order.mobile}}</td>
+                        <td>{{order.address}}</td>
+                        <td>{{order.note}}</td>
+                        <td>
+                            <div *ngIf="order.payment === 'bank'; then bank; else cod;"></div>
+                            <ng-template #bank>
+                                Chuyển khoản
+                            </ng-template>
+                            <ng-template #cod>
+                                COD
+                            </ng-template>
+                        </td>
+                        <td>
+                            <div *ngIf="order.order_status_id === 0; then no; else yes;"></div>
+                            <ng-template #no>
+                                Chưa xử lý
+                            </ng-template>
+                            <ng-template #yes>
+                                {{order.order_status.content}}
+                            </ng-template>
+                        </td>
+                        <td>
+                            {{order.created_at | date : "dd/MM/yy HH:mm"}}
+                        </td>
+                        <td>
+                            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
+                                (click)="edit(order)"></button>
+                        </td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="rowexpansion" let-order>
+                    <tr>
+                        <td colspan="12">
+                            <div class="p-3">
+                                <p-table [value]="order.order_items" dataKey="id">
+                                    <ng-template pTemplate="header">
+                                        <tr>
+                                            <th pSortableColumn="id">ID <p-sortIcon field="id"></p-sortIcon>
+                                            </th>
+                                            <th pSortableColumn="product_name">Tên <p-sortIcon field="product_name"></p-sortIcon>
+                                            </th>
+                                            <th pSortableColumn="product_code">Code <p-sortIcon field="product_code"></p-sortIcon>
+                                            </th>
+                                            <th pSortableColumn="product_size">Kích thước <p-sortIcon field="product_size"></p-sortIcon>
+                                            </th>
+                                            <th pSortableColumn="product_price">Giá <p-sortIcon field="product_price"></p-sortIcon>
+                                            </th>
+                                            <th pSortableColumn="quantity">Số lượng <p-sortIcon field="quantity"></p-sortIcon>
+                                            </th>
+                                            <th >Tổng 
+                                            </th>
+                                        </tr>
+                                    </ng-template>
+                                    <ng-template pTemplate="body" let-orderItem>
+                                        <tr>
+                                            <td>{{orderItem.id}}</td>
+                                            <td>{{orderItem.product_name}}</td>
+                                            <td>{{orderItem.product_code}}</td>
+                                            <td>{{orderItem.product_size}}</td>
+                                            <td>{{orderItem.product_price | currency:'VND'}}</td>
+                                            <td>{{orderItem.quantity}}</td>
+                                            <td>{{orderItem.quantity * orderItem.product_price | currency:'VND'}}</td>
+                                        </tr>
+                                    </ng-template>
+
+                                    <ng-template pTemplate="footer">
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>{{order.total_money | currency:'VND'}}</td>
+                                    </tr>
+                                    </ng-template>
+                                    
+                                    <ng-template pTemplate="emptymessage">
+                                        <tr>
+                                            <td colspan="6">Không có dữ liệu.</td>
+                                        </tr>
+                                    </ng-template>
+                                </p-table>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+
+
+
+
+
+
+
+        <form [formGroup]="form">
+            <p-dialog [(visible)]="dialog" [style]="{width: '800px', height: '750px'}" header="Đơn hàng" [modal]="true"
+                styleClass="p-fluid">
+                <ng-template pTemplate="content">
+                    <input type="hidden" pInputText formControlName="id" />
+                    <div class="p-field margin-top-10">
+                        <label for="bill_of_lading_no">Mã vận đơn</label>
+                        <input type="text" pInputText id="bill_of_lading_no" formControlName="bill_of_lading_no" autofocus />
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="shipping_unit_id">Đơn vị vận chuyển</label>
+                        <p-dropdown id="shipping_unit_id"
+                            [options]="shippingUnits" formControlName="shipping_unit_id"
+                            placeholder="Chọn Đơn vị vận chuyển" [showClear]="true" optionLabel="name"
+                            optionValue="id">
+                        </p-dropdown>
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="order_status">Trạng thái đơn hàng</label>
+                        <p-dropdown [ngClass]="{'is-invalid' : submitted && f.order_status_id.errors}" id="order_status"
+                            [options]="orderStatuses" formControlName="order_status_id"
+                            placeholder="Chọn Trạng thái đơn hàng" [showClear]="true" optionLabel="content"
+                            optionValue="id">
+                        </p-dropdown>
+                        <div *ngIf="submitted && f.order_status_id.errors" class="invalid-feedback">
+                            <div *ngIf="f.order_status_id.errors.required">
+                                Vui lòng chọn Trạng thái đơn hàng
+                            </div>
+                        </div>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="footer">
+                    <button pButton pRipple label="Lưu" icon="pi pi-check" class="p-button-success"
+                        (click)="save()"></button>
+                    <button pButton pRipple label="Huỷ" icon="pi pi-times" class="p-button-danger"
+                        (click)="hideDialog()"></button>
+                </ng-template>
+            </p-dialog>
+        </form>
+    </section>
+</div>

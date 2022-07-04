@@ -1,0 +1,54 @@
+<div class="hold-transition login-page">
+    <div class="login-box">
+        <div class="login-logo">
+            <a href="javascript:;" routerLink="/login"><b>Thiên An</b>Vina</a>
+        </div>
+        <!-- /.login-logo -->
+        <div class="card">
+            <div class="card-body login-card-body">
+                <p class="login-box-msg">Đăng nhập để sử dụng hệ thống</p>
+                <form [formGroup]="form" (ngSubmit)="submit()">
+                    <div class="input-group mb-3">
+                        <input type="email" class="form-control" name="email" autocomplete="email" placeholder="Email" formControlName="email" [ngClass]="{'is-invalid' : submitted && f.email.errors}">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-envelope"></span>
+                            </div>
+                        </div>
+                        <div *ngIf="submitted && f.email.errors" class="invalid-feedback">
+                            <div *ngIf="f.email.errors.required">
+                                Email is required
+                            </div>
+                            <div *ngIf="f.email.errors.email">
+                                Email must be a valid email address
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <input type="password" class="form-control" name="password" autocomplete="password" placeholder="Password" formControlName="password" [ngClass]="{'is-invalid' : submitted && f.password.errors}">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                        <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
+                            <div *ngIf="f.password.errors.required">
+                                Password is required
+                            </div>
+                            <div *ngIf="f.password.errors.minlength">
+                                Password must be at least 6 characters
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3"></div>
+                        <div class="col-6">
+                            <button type="submit" class="btn btn-primary btn-block">Đăng nhập</button>
+                        </div>
+                        <div class="col-md-3"></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

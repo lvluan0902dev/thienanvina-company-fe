@@ -1,0 +1,157 @@
+<div class="content-wrapper">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <!-- <h1>Blank Page</h1> -->
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="javascript:;">Tổng quan</a></li>
+                        <li class="breadcrumb-item active">Trang chủ</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>{{countProductCategory}}</h3>
+                            <p>Danh mục sản phẩm</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                        <a href="javascript:;" routerLink="/product-category" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>{{countProduct}}</h3>
+                            <p>Sản phẩm</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-box-open"></i>
+                        </div>
+                        <a href="javascript:;"  routerLink="/product" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-primary">
+                        <div class="inner">
+                            <h3>{{countOrder}}</h3>
+                            <p>Đơn hàng</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-shipping-fast"></i>
+                        </div>
+                        <a href="javascript:;"  routerLink="/order" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-secondary">
+                        <div class="inner">
+                            <h3>{{countUser}}</h3>
+                            <p>Khách hàng</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <a href="javascript:;" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header border-transparent">
+                            <h3 class="card-title">Sản phẩm được xem nhiều nhất</h3>
+
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <!-- <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                    <i class="fas fa-times"></i>
+                                </button> -->
+                            </div>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table m-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Tên</th>
+                                            <th>Hình ảnh</th>
+                                            <th>Lượt xem</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody *ngFor="let product of mostViewedProduct">
+                                        <tr>
+                                            <td>{{product.name}}</td>
+                                            <td>
+                                                <img style="width: 100px;" src="{{url + product.image.image_path}}" alt="{{product.image.image}}">
+                                            </td>
+                                            <td>{{product.view_count}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-footer clearfix">
+                            <!-- <a href="javascript:void(0)" class="btn btn-sm btn-info float-left">Place New Order</a> -->
+                            <a href="javascript:;" routerLink="/product" class="btn btn-sm btn-secondary float-right">Xem tất cả</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header border-transparent">
+                            <h3 class="card-title">Đơn hàng mới nhất</h3>
+
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <!-- <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                    <i class="fas fa-times"></i>
+                                </button> -->
+                            </div>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table m-0">
+                                    <thead>
+                                        <tr>
+                                            <th>MĐH</th>
+                                            <th>Tên</th>
+                                            <th>Thời gian</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody *ngFor="let order of orderLatest">
+                                        <tr>
+                                            <td>{{order.code}}</td>
+                                            <td>{{order.name}}</td>
+                                            <td>{{order.created_at | date: 'dd/MM/yy hh:mm'}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-footer clearfix">
+                            <a href="javascript:;" routerLink="/order" class="btn btn-sm btn-secondary float-right">Xem tất cả</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

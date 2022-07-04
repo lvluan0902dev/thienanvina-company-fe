@@ -1,0 +1,142 @@
+<div class="content-wrapper">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Danh sách Faq</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="javascript:;">Trang Faq</a></li>
+                        <li class="breadcrumb-item active">Faq</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="content">
+        <div class="card">
+            <p-toolbar styleClass="mb-4">
+                <ng-template pTemplate="left">
+                    <button pButton pRipple label="Thêm" icon="pi pi-plus" class="p-button-success mr-2"
+                        (click)="openNew()"></button>
+                </ng-template>
+                <ng-template pTemplate="right">
+                    <span class="p-input-icon-left ml-auto">
+                        <i class="pi pi-search"></i>
+                        <input pInputText type="text" #input (input)="dt.filterGlobal(input.value, 'contains')"
+                            placeholder="Tìm kiếm" />
+                    </span>
+                </ng-template>
+            </p-toolbar>
+            <p-table [value]="faqs" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" #dt
+                responsiveLayout="scroll"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                [rowsPerPageOptions]="[10,25,50]" [globalFilterFields]='["order", "title", "content"]'>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>STT</th>
+                        <th pSortableColumn="order">Thứ tự <p-sortIcon field="order"></p-sortIcon>
+                        </th>
+                        <th pSortableColumn="title">Tiêu đề <p-sortIcon field="title"></p-sortIcon>
+                        </th>
+                        <th pSortableColumn="content">Nội dung <p-sortIcon field="content"></p-sortIcon>
+                        </th>
+                        <th pSortableColumn="status">Trạng thái <p-sortIcon field="status"></p-sortIcon>
+                        </th>
+                        <th>Hành động</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-faq let-i="rowIndex">
+                    <tr>
+                        <td>{{i + 1}}</td>
+                        <td>{{faq.order}}</td>
+                        <td>{{faq.title}}</td>
+                        <td>
+                            <div [innerHTML]="faq.content | safe: 'html'"></div>
+                        </td>
+                        <td>
+                            <b><span *ngIf="faq.status == 1" [ngStyle]="{color:'var(--green-600)'}">Bật</span></b>
+                            <b><span *ngIf="faq.status == 0" [ngStyle]="{color:'var(--red-600)'}">Tắt</span></b>
+                        </td>
+                        <td>
+                            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
+                                (click)="edit(faq)"></button>
+                            <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning"
+                                (click)="delete(faq)"></button>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+
+
+
+
+
+
+
+        <form [formGroup]="form">
+            <p-dialog [(visible)]="dialog" [style]="{width: '800px'}" header="Faq" [modal]="true"
+                styleClass="p-fluid" [maximizable]="true">
+                <ng-template pTemplate="content">
+                    <input type="hidden" pInputText formControlName="id" />
+                    <div class="p-field margin-top-10">
+                        <label for="title">Tiêu đề</label>
+                        <input type="text" pInputText id="title" formControlName="title" autofocus
+                            [ngClass]="{'is-invalid' : submitted && f.title.errors}" />
+                        <div *ngIf="submitted && f.title.errors" class="invalid-feedback">
+                            <div *ngIf="f.title.errors.required">
+                                Vui lòng nhập Tiêu đề
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="content">Nội dung</label>
+                        <editor apiKey="8j7su2hn4okmz32icrx43famupx36ujqadijpi0zzemwh2i5" [ngClass]="{'is-invalid' : submitted && f.content.errors}" id="content" formControlName="content"
+                            [init]="{
+                                base_url: '/tinymce',
+                                suffix: '.min',
+                                height: 500,
+                                menubar: true,
+                                plugins: [
+                                'advlist autolink lists link image charmap print preview anchor codesample',
+                                'searchreplace visualblocks code fullscreen image imagetools',
+                                'insertdatetime media table paste code help wordcount'
+                                ],
+                                codesample_languages: [
+                                { text: 'TypeScript', value: 'typescript' },
+                                { text: 'JavaScript', value: 'javascript' },
+                                { text: 'HTML/XML', value: 'markup' },
+                                { text: 'CSS', value: 'css' }
+                                ],
+                                toolbar:
+                                'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | link image media codesample'}">
+                        </editor>
+                        <div *ngIf="submitted && f.content.errors" class="invalid-feedback">
+                            <div *ngIf="f.content.errors.required">
+                                Vui lòng nhập Nội dung
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="order">Thứ tự</label>
+                        <input type="number" pInputText id="order" formControlName="order" />
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="status">Trạng thái</label>
+                        <br>
+                        <p-toggleButton onLabel="Bật" offLabel="Tắt"onIcon="pi pi-check" offIcon="pi pi-times"
+                            formControlName="status" [style]="{width: '100px'}"></p-toggleButton>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="footer">
+                    <button pButton pRipple label="Lưu" icon="pi pi-check" class="p-button-success"
+                        (click)="save()"></button>
+                    <button pButton pRipple label="Huỷ" icon="pi pi-times" class="p-button-danger"
+                        (click)="hideDialog()"></button>
+                </ng-template>
+            </p-dialog>
+        </form>
+    </section>
+</div>

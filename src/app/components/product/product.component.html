@@ -1,0 +1,557 @@
+<div class="content-wrapper">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Danh sách Sản phẩm</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="javascript:;">Trang chủ</a></li>
+                        <li class="breadcrumb-item active">Sản phẩm</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="content">
+        <div class="card">
+            <p-toolbar styleClass="mb-4">
+                <ng-template pTemplate="left">
+                    <button pButton pRipple label="Thêm" icon="pi pi-plus" class="p-button-success mr-2"
+                        (click)="openNew()"></button>
+                </ng-template>
+                <ng-template pTemplate="right">
+                    <span class="p-input-icon-left ml-auto">
+                        <i class="pi pi-search"></i>
+                        <input pInputText type="text" #input (input)="dt.filterGlobal(input.value, 'contains')"
+                            placeholder="Tìm kiếm" />
+                    </span>
+                </ng-template>
+            </p-toolbar>
+            <p-table [value]="products" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" #dt
+                responsiveLayout="scroll"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                [rowsPerPageOptions]="[10,25,50]" [globalFilterFields]='["order", "title", "name", "product_category.name", "product_brand.name", "product_unit"]'>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>STT</th>
+                        <th pSortableColumn="order">Thứ tự <p-sortIcon field="order"></p-sortIcon>
+                        </th>
+                        <th pSortableColumn="name">Tên <p-sortIcon field="name"></p-sortIcon>
+                        </th>
+                        <th pSortableColumn="product_unit">ĐVT <p-sortIcon field="product_unit"></p-sortIcon>
+                        </th>
+                        <th pSortableColumn="product_category.name">Danh mục <p-sortIcon field="product_category.name"></p-sortIcon>
+                        </th>
+                        <th pSortableColumn="product_brand.name">Thương hiệu <p-sortIcon field="product_brand.name"></p-sortIcon>
+                        </th>
+                        <th>Hình ảnh</th>
+                        <th pSortableColumn="status">Trạng thái <p-sortIcon field="status"></p-sortIcon>
+                        </th>
+                        <th>Hành động</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-product let-i="rowIndex">
+                    <tr>
+                        <td>{{i + 1}}</td>
+                        <td>{{product.order}}</td>
+                        <td>{{product.name}}</td>
+                        <td>
+                            <div *ngIf="isEmptyObject(product.product_unit) === false; then hasProductUnit; else noProductUnit"></div>
+                            <ng-template #hasProductUnit>
+                                {{product.product_unit.name}}
+                            </ng-template>
+                            <ng-template #noProductUnit>Không có</ng-template>
+                        </td>
+                        <td>{{product.product_category.name}}</td>
+                        <td>{{product.product_brand.name}}</td>
+                        <td>
+                            <div *ngIf="isEmptyObject(product.image) === false; then hasImage; else noImage">
+
+                            </div>
+                            <ng-template #hasImage>
+                                <p-image src="{{url + product.image.image_path}}" alt="{{product.image.image}}"
+                                    width="150" [preview]="true"></p-image>
+                            </ng-template>
+                            <ng-template #noImage>
+                            </ng-template>
+                        </td>
+                        <td>
+                            <b><span *ngIf="product.status == 1" [ngStyle]="{color:'var(--green-600)'}">Bật</span></b>
+                            <b><span *ngIf="product.status == 0" [ngStyle]="{color:'var(--red-600)'}">Tắt</span></b>
+                        </td>
+                        <td>
+                            <button pButton pRipple icon="fas fa-align-justify" class="p-button-rounded p-button-info mr-2" (click)="openProductAttribute(product.id)"></button>
+                            <button pButton pRipple icon="far fa-images" class="p-button-rounded p-button-info mr-2" (click)="openProductImage(product.id)"></button>
+                            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
+                                (click)="edit(product)"></button>
+                            <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning"
+                                (click)="delete(product)"></button>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+
+
+
+
+
+
+        <!-- Form Product -->
+        <form [formGroup]="form">
+            <p-dialog [(visible)]="dialog" [style]="{width: '800px'}" header="Sản phẩm" [modal]="true"
+                styleClass="p-fluid" [maximizable]="true">
+                <ng-template pTemplate="content">
+                    <input type="hidden" pInputText formControlName="id" />
+                    <div class="p-field margin-top-10">
+                        <label for="name">Tên</label>
+                        <input type="text" pInputText id="name" formControlName="name" autofocus
+                            [ngClass]="{'is-invalid' : submitted && f.name.errors}" />
+                        <div *ngIf="submitted && f.name.errors" class="invalid-feedback">
+                            <div *ngIf="f.name.errors.required">
+                                Vui lòng nhập Tên
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="product_category">Danh mục sản phẩm</label>
+                        <p-dropdown [ngClass]="{'is-invalid' : submitted && f.product_category_id.errors}" id="product_category"
+                            [options]="productCategories" formControlName="product_category_id"
+                            placeholder="Chọn Danh mục sản phẩm" [showClear]="true" optionLabel="name" optionValue="id">
+                        </p-dropdown>
+                        <div *ngIf="submitted && f.product_category_id.errors" class="invalid-feedback">
+                            <div *ngIf="f.product_category_id.errors.required">
+                                Vui lòng chọn Danh mục sản phẩm
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="product_brand">Thương hiệu sản phẩm</label>
+                        <p-dropdown [ngClass]="{'is-invalid' : submitted && f.product_brand_id.errors}" id="product_brand"
+                            [options]="productBrands" formControlName="product_brand_id"
+                            placeholder="Chọn Thương hiệu sản phẩm" [showClear]="true" optionLabel="name"
+                            optionValue="id">
+                        </p-dropdown>
+                        <div *ngIf="submitted && f.product_brand_id.errors" class="invalid-feedback">
+                            <div *ngIf="f.product_brand_id.errors.required">
+                                Vui lòng chọn Thương hiệu sản phẩm
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="product_unit">Đơn vị tính</label>
+                        <p-dropdown [ngClass]="{'is-invalid' : submitted && f.product_unit_id.errors}" id="product_unit"
+                            [options]="productUnits" formControlName="product_unit_id"
+                            placeholder="Chọn Đơn vị tính" [showClear]="true" optionLabel="name"
+                            optionValue="id">
+                        </p-dropdown>
+                        <div *ngIf="submitted && f.product_unit_id.errors" class="invalid-feedback">
+                            <div *ngIf="f.product_unit_id.errors.required">
+                                Vui lòng chọn Đơn vị tính
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="short_description">Mô tả ngắn</label>
+                        <editor apiKey="8j7su2hn4okmz32icrx43famupx36ujqadijpi0zzemwh2i5"
+                            [ngClass]="{'is-invalid' : submitted && f.short_description.errors}" id="short_description"
+                            formControlName="short_description"
+                            [init]="{
+                                base_url: '/tinymce',
+                                suffix: '.min',
+                                height: 500,
+                                menubar: true,
+                                plugins: [
+                                'advlist autolink lists link image charmap print preview anchor codesample',
+                                'searchreplace visualblocks code fullscreen image imagetools',
+                                'insertdatetime media table paste code help wordcount'
+                                ],
+                                codesample_languages: [
+                                { text: 'TypeScript', value: 'typescript' },
+                                { text: 'JavaScript', value: 'javascript' },
+                                { text: 'HTML/XML', value: 'markup' },
+                                { text: 'CSS', value: 'css' }
+                                ],
+                                toolbar:
+                                'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | link image media codesample'}">
+                        </editor>
+                        <div *ngIf="submitted && f.short_description.errors" class="invalid-feedback">
+                            <div *ngIf="f.short_description.errors.required">
+                                Vui lòng nhập Mô tả ngắn
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="description">Mô tả</label>
+                        <editor apiKey="8j7su2hn4okmz32icrx43famupx36ujqadijpi0zzemwh2i5"
+                            [ngClass]="{'is-invalid' : submitted && f.description.errors}" id="description"
+                            formControlName="description"
+                            [init]="{
+                                base_url: '/tinymce',
+                                suffix: '.min',
+                                height: 500,
+                                menubar: true,
+                                plugins: [
+                                'advlist autolink lists link image charmap print preview anchor codesample',
+                                'searchreplace visualblocks code fullscreen image imagetools',
+                                'insertdatetime media table paste code help wordcount'
+                                ],
+                                codesample_languages: [
+                                { text: 'TypeScript', value: 'typescript' },
+                                { text: 'JavaScript', value: 'javascript' },
+                                { text: 'HTML/XML', value: 'markup' },
+                                { text: 'CSS', value: 'css' }
+                                ],
+                                toolbar:
+                                'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | link image media codesample'}">
+                        </editor>
+                        <div *ngIf="submitted && f.description.errors" class="invalid-feedback">
+                            <div *ngIf="f.description.errors.required">
+                                Vui lòng nhập Mô tả
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="specification">Thông số kỹ thuật</label>
+                        <editor apiKey="8j7su2hn4okmz32icrx43famupx36ujqadijpi0zzemwh2i5"
+                            [ngClass]="{'is-invalid' : submitted && f.specification.errors}" id="specification"
+                            formControlName="specification"
+                            [init]="{
+                                base_url: '/tinymce',
+                                suffix: '.min',
+                                height: 500,
+                                menubar: true,
+                                plugins: [
+                                'advlist autolink lists link image charmap print preview anchor codesample',
+                                'searchreplace visualblocks code fullscreen image imagetools',
+                                'insertdatetime media table paste code help wordcount'
+                                ],
+                                codesample_languages: [
+                                { text: 'TypeScript', value: 'typescript' },
+                                { text: 'JavaScript', value: 'javascript' },
+                                { text: 'HTML/XML', value: 'markup' },
+                                { text: 'CSS', value: 'css' }
+                                ],
+                                toolbar:
+                                'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | link image media codesample'}">
+                        </editor>
+                        <div *ngIf="submitted && f.specification.errors" class="invalid-feedback">
+                            <div *ngIf="f.specification.errors.required">
+                                Vui lòng nhập Thông số kỹ thuật
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="order">Thứ tự</label>
+                        <input type="number" pInputText id="order" formControlName="order" />
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="title">Hình ảnh</label>
+                        <p-fileUpload name="image"
+                            url="{{url + 'api/shared/upload-single-image?folder=product&height=500&with=500'}}"
+                            (onUpload)="onUpload($event)" accept="image/*"
+                            [ngClass]="{'is-invalid' : submitted && isEmptyObject(selectedImage)}">
+                        </p-fileUpload>
+                        <div class="card">
+                            <p-table [value]="images" selectionMode="single" [(selection)]="selectedImage" dataKey="id"
+                                responsiveLayout="scroll" (onRowSelect)="onRowSelect($event)"
+                                (onRowUnselect)="onRowUnselect($event)" [paginator]="true" [rows]="5">
+                                <ng-template pTemplate="header">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Image</th>
+                                        <th>Hành động</th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-image>
+                                    <tr [pSelectableRow]="image">
+                                        <td>{{image.id}}</td>
+                                        <td>
+                                            <p-image src="{{url + image.image_path}}" alt="{{image.image}}" width="150"
+                                                [preview]="true"></p-image>
+                                        </td>
+                                        <td>
+                                            <button pButton pRipple icon="pi pi-trash"
+                                                class="p-button-rounded p-button-warning width-button-2_357r"
+                                                (click)="deleteImage(image)"></button>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+                        <div *ngIf="submitted && isEmptyObject(selectedImage)" class="invalid-feedback">
+                            <div *ngIf="isEmptyObject(selectedImage)">
+                                Vui lòng chọn Hình ảnh
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="order">Trạng thái</label>
+                        <br>
+                        <p-toggleButton onLabel="Bật" offLabel="Tắt"onIcon="pi pi-check" offIcon="pi pi-times"
+                            formControlName="status" [style]="{width: '100px'}"></p-toggleButton>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="footer">
+                    <button pButton pRipple label="Lưu" icon="pi pi-check" class="p-button-success"
+                        (click)="save()"></button>
+                    <button pButton pRipple label="Huỷ" icon="pi pi-times" class="p-button-danger"
+                        (click)="hideDialog()"></button>
+                </ng-template>
+            </p-dialog>
+        </form>
+
+
+
+
+
+
+        <!-- Form Product Attribute -->
+        <form [formGroup]="formProductAttribute">
+            <p-dialog [(visible)]="dialogProductAttribute" [style]="{width: '800px'}" header="Thuộc tính sản phẩm" [modal]="true"
+                styleClass="p-fluid">
+                <ng-template pTemplate="content">
+                    <input type="hidden" pInputText formControlName="id" />
+                    <input type="hidden" pInputText formControlName="product_id" />
+                    <div class="p-field margin-top-10">
+                        <label for="code">Code</label>
+                        <input type="text" pInputText id="code" formControlName="code"
+                            [ngClass]="{'is-invalid' : submittedProductAttribute && fProductAttribute.code.errors}" />
+                        <div *ngIf="submittedProductAttribute && fProductAttribute.code.errors" class="invalid-feedback">
+                            <div *ngIf="fProductAttribute.code.errors.required">
+                                Vui lòng nhập Code
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="size">Kích thước</label>
+                        <input type="text" pInputText id="size" formControlName="size"
+                            [ngClass]="{'is-invalid' : submittedProductAttribute && fProductAttribute.size.errors}" />
+                        <div *ngIf="submittedProductAttribute && fProductAttribute.size.errors" class="invalid-feedback">
+                            <div *ngIf="fProductAttribute.size.errors.required">
+                                Vui lòng nhập Kích thước
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="price">Giá</label>
+                        <input type="number" pInputText id="price" formControlName="price"
+                            [ngClass]="{'is-invalid' : submittedProductAttribute && fProductAttribute.price.errors}" />
+                        <div *ngIf="submittedProductAttribute && fProductAttribute.price.errors" class="invalid-feedback">
+                            <div *ngIf="fProductAttribute.price.errors.required">
+                                Vui lòng nhập Giá
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="stock">Số lượng</label>
+                        <input type="number" pInputText id="stock" formControlName="stock"
+                            [ngClass]="{'is-invalid' : submittedProductAttribute && fProductAttribute.stock.errors}" />
+                        <div *ngIf="submittedProductAttribute && fProductAttribute.stock.errors" class="invalid-feedback">
+                            <div *ngIf="fProductAttribute.stock.errors.required">
+                                Vui lòng nhập Số lượng
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="order">Thứ tự</label>
+                        <input type="number" pInputText id="order" formControlName="order" />
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="status">Trạng thái</label>
+                        <br>
+                        <p-toggleButton onLabel="Bật" id="status" offLabel="Tắt"onIcon="pi pi-check" offIcon="pi pi-times"
+                            formControlName="status" [style]="{width: '100px'}"></p-toggleButton>
+                    </div>
+                    <div class="d-flex justify-content-center mt-3 mb-3">
+                        <button pButton pRipple label="Lưu" icon="pi pi-check" class="p-button-success"
+                        (click)="saveProductAttribute()"></button>
+                        <div [style]="{width: '10px'}"></div>
+                        <button pButton pRipple label="Đặt lại" icon="pi pi-times" class="p-button-danger"
+                        (click)="resetFormProductAttribute()"></button>
+                    </div>
+                    <div>
+                        <div class="card">
+                            <p-table [value]="productAttributes"
+                                responsiveLayout="stack" [paginator]="true" [rows]="5">
+                                <ng-template pTemplate="header">
+                                    <tr>
+                                        <th>STT</th>
+                                        <th pSortableColumn="order">Thứ tự <p-sortIcon field="order"></p-sortIcon></th>
+                                        <th pSortableColumn="code">Code <p-sortIcon field="code"></p-sortIcon>
+                                        <th pSortableColumn="size">Kích thước <p-sortIcon field="size"></p-sortIcon>
+                                        <th pSortableColumn="price">Giá <p-sortIcon field="price"></p-sortIcon>
+                                        <th pSortableColumn="stock">Số lượng <p-sortIcon field="stock"></p-sortIcon>
+                                        <th pSortableColumn="status">Trạng thái <p-sortIcon field="status"></p-sortIcon>
+                                        <th>Hành động</th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-productAttribute let-i="rowIndex">
+                                    <tr>
+                                        <td><span class="p-column-title">STT</span>{{i + 1}}</td>
+                                        <td><span class="p-column-title">Thứ tự</span>{{productAttribute.order}}</td>
+                                        <td><span class="p-column-title">Code</span>{{productAttribute.code}}</td>
+                                        <td><span class="p-column-title">Kích thước</span>{{productAttribute.size}}</td>
+                                        <td><span class="p-column-title">Giá</span>{{productAttribute.price | currency: 'VND'}}</td>
+                                        <td><span class="p-column-title">Số lượng</span>{{productAttribute.stock | number}}</td>
+                                        <td>
+                                            <span class="p-column-title">Trạng thái</span>
+                                            <div *ngIf="productAttribute.status === 1; then statusOn; else statusOff"></div>
+                                            <ng-template #statusOn>
+                                                <b><span [ngStyle]="{color:'var(--green-600)'}">Bật</span></b>
+                                            </ng-template>
+                                            <ng-template #statusOff>
+                                                <b><span [ngStyle]="{color:'var(--red-600)'}">Tắt</span></b>
+                                            </ng-template>
+                                        </td>
+                                        <td>
+                                            <span class="p-column-title">Hành động</span>
+                                            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
+                                                (click)="editProductAttribute(productAttribute)"></button>
+                                            <button pButton pRipple icon="pi pi-trash"
+                                                class="p-button-rounded p-button-warning width-button-2_357r"
+                                                (click)="deleteProductAttribute(productAttribute)"></button>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="footer">
+                        <button pButton pRipple label="Đóng" icon="pi pi-times" class="p-button-danger"
+                        (click)="hideDialogProductAttribute()"></button>
+                </ng-template>
+            </p-dialog>
+        </form>
+
+
+
+
+
+
+        <form [formGroup]="formProductImage">
+            <p-dialog [(visible)]="dialogProductImage" [style]="{width: '800px'}" header="Hình ảnh sản phẩm" [modal]="true"
+                styleClass="p-fluid">
+                <ng-template pTemplate="content">
+                    <input type="hidden" pInputText formControlName="id" />
+                    <input type="hidden" pInputText formControlName="product_id" />
+                    <div class="p-field margin-top-10">
+                        <label for="title">Hình ảnh</label>
+                        <p-fileUpload name="image"
+                            url="{{url + 'api/shared/upload-single-image?folder=product_image&height=500&with=500'}}"
+                            (onUpload)="onUploadProductImage($event)" accept="image/*"
+                            [ngClass]="{'is-invalid' : submittedProductImage && isEmptyObject(selectedProductImage)}">
+                        </p-fileUpload>
+                        <div class="card">
+                            <p-table [value]="imageOfProductImages" selectionMode="single" [(selection)]="selectedProductImage" dataKey="id"
+                                responsiveLayout="scroll" (onRowSelect)="onRowSelectProductImage($event)"
+                                (onRowUnselect)="onRowUnselectProductImage($event)" [paginator]="true" [rows]="5">
+                                <ng-template pTemplate="header">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Image</th>
+                                        <th>Hành động</th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-image>
+                                    <tr [pSelectableRow]="image">
+                                        <td>{{image.id}}</td>
+                                        <td>
+                                            <p-image src="{{url + image.image_path}}" alt="{{image.image}}" width="150"
+                                                [preview]="true"></p-image>
+                                        </td>
+                                        <td>
+                                            <button pButton pRipple icon="pi pi-trash"
+                                                class="p-button-rounded p-button-warning width-button-2_357r"
+                                                (click)="deleteImageOfProductImage(image)"></button>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+                        <div *ngIf="submittedProductImage && isEmptyObject(selectedProductImage)" class="invalid-feedback">
+                            <div *ngIf="isEmptyObject(selectedProductImage)">
+                                Vui lòng chọn Hình ảnh
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="order">Thứ tự</label>
+                        <input type="number" pInputText id="order" formControlName="order" />
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="status">Trạng thái</label>
+                        <br>
+                        <p-toggleButton onLabel="Bật" id="status" offLabel="Tắt"onIcon="pi pi-check" offIcon="pi pi-times"
+                            formControlName="status" [style]="{width: '100px'}"></p-toggleButton>
+                    </div>
+                    <div class="d-flex justify-content-center mt-3 mb-3">
+                        <button pButton pRipple label="Lưu" icon="pi pi-check" class="p-button-success"
+                        (click)="saveProductImage()"></button>
+                        <div [style]="{width: '10px'}"></div>
+                        <button pButton pRipple label="Đặt lại" icon="pi pi-times" class="p-button-danger"
+                        (click)="resetFormProductImage()"></button>
+                    </div>
+                    <div>
+                        <div class="card">
+                            <p-table [value]="productImages"
+                                responsiveLayout="stack" [paginator]="true" [rows]="5">
+                                <ng-template pTemplate="header">
+                                    <tr>
+                                        <th>STT</th>
+                                        <th pSortableColumn="order">Thứ tự <p-sortIcon field="order"></p-sortIcon></th>
+                                        <th>Hình ảnh</th>
+                                        <th pSortableColumn="status">Trạng thái <p-sortIcon field="status"></p-sortIcon>
+                                        <th>Hành động</th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-productImage let-i="rowIndex">
+                                    <tr>
+                                        <td><span class="p-column-title">STT</span>{{i + 1}}</td>
+                                        <td><span class="p-column-title">Thứ tự</span>{{productImage.order}}</td>
+                                        <td>
+                                            <div *ngIf="isEmptyObject(productImage.image) === false; then hasImage; else noImage">
+                
+                                            </div>
+                                            <ng-template #hasImage>
+                                                <p-image src="{{url + productImage.image.image_path}}" alt="{{productImage.image.image}}"
+                                                    width="150" [preview]="true"></p-image>
+                                            </ng-template>
+                                            <ng-template #noImage>
+                                            </ng-template>
+                                        </td>
+                                        <td>
+                                            <span class="p-column-title">Trạng thái</span>
+                                            <div *ngIf="productImage.status === 1; then statusOn; else statusOff"></div>
+                                            <ng-template #statusOn>
+                                                <b><span [ngStyle]="{color:'var(--green-600)'}">Bật</span></b>
+                                            </ng-template>
+                                            <ng-template #statusOff>
+                                                <b><span [ngStyle]="{color:'var(--red-600)'}">Tắt</span></b>
+                                            </ng-template>
+                                        </td>
+                                        <td>
+                                            <span class="p-column-title">Hành động</span>
+                                            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
+                                                (click)="editProductImage(productImage)"></button>
+                                            <button pButton pRipple icon="pi pi-trash"
+                                                class="p-button-rounded p-button-warning width-button-2_357r"
+                                                (click)="deleteProductImage(productImage)"></button>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="footer">
+                        <button pButton pRipple label="Đóng" icon="pi pi-times" class="p-button-danger"
+                        (click)="hideDialogProductImage()"></button>
+                </ng-template>
+            </p-dialog>
+        </form>
+    </section>
+</div>

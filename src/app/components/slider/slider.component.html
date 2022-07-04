@@ -1,0 +1,206 @@
+<div class="content-wrapper">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Danh sách Slider</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="javascript:;">Trang chủ</a></li>
+                        <li class="breadcrumb-item active">Slider</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="content">
+        <div class="card">
+            <p-toolbar styleClass="mb-4">
+                <ng-template pTemplate="left">
+                    <button pButton pRipple label="Thêm" icon="pi pi-plus" class="p-button-success mr-2"
+                        (click)="openNew()"></button>
+                </ng-template>
+                <ng-template pTemplate="right">
+                    <span class="p-input-icon-left ml-auto">
+                        <i class="pi pi-search"></i>
+                        <input pInputText type="text" #input (input)="dt.filterGlobal(input.value, 'contains')"
+                            placeholder="Tìm kiếm" />
+                    </span>
+                </ng-template>
+            </p-toolbar>
+            <p-table [value]="sliders" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" #dt
+                responsiveLayout="scroll"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                [rowsPerPageOptions]="[10,25,50]" [globalFilterFields]='["order", "title", "content"]'>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>STT</th>
+                        <th pSortableColumn="order">Thứ tự <p-sortIcon field="order"></p-sortIcon>
+                        </th>
+                        <th pSortableColumn="title">Tiêu đề <p-sortIcon field="title"></p-sortIcon>
+                        </th>
+                        <th pSortableColumn="content">Nội dung <p-sortIcon field="content"></p-sortIcon>
+                        </th>
+                        <th>Hình ảnh</th>
+                        <th>Đường dẫn</th>
+                        <th pSortableColumn="status">Trạng thái <p-sortIcon field="status"></p-sortIcon>
+                        </th>
+                        <th>Hành động</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-slider let-i="rowIndex">
+                    <tr>
+                        <td>{{i + 1}}</td>
+                        <td>{{slider.order}}</td>
+                        <td>{{slider.title}}</td>
+                        <td [innerHtml]="slider.content | safe: 'html'"></td>
+                        <td>
+                            <div *ngIf="isEmptyObject(slider.image) === false; then hasImage; else noImage">
+
+                            </div>
+                            <ng-template #hasImage>
+                                <p-image src="{{url + slider.image.image_path}}" alt="{{slider.image.image}}"
+                                    width="150" [preview]="true"></p-image>
+                            </ng-template>
+                            <ng-template #noImage>
+                            </ng-template>
+                        </td>
+                        <td>
+                            <a href="{{slider.link}}" target="_blank">Truy cập</a>
+                        </td>
+                        <td>
+                            <b><span *ngIf="slider.status == 1" [ngStyle]="{color:'var(--green-600)'}">Bật</span></b>
+                            <b><span *ngIf="slider.status == 0" [ngStyle]="{color:'var(--red-600)'}">Tắt</span></b>
+                        </td>
+                        <td>
+                            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
+                                (click)="edit(slider)"></button>
+                            <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning"
+                                (click)="delete(slider)"></button>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+
+
+
+
+
+
+
+        <form [formGroup]="form">
+            <p-dialog [(visible)]="dialog" [style]="{width: '800px'}" header="Slider" [modal]="true"
+                styleClass="p-fluid" [maximizable]="true">
+                <ng-template pTemplate="content">
+                    <input type="hidden" pInputText formControlName="id" />
+                    <div class="p-field margin-top-10">
+                        <label for="title">Tiêu đề</label>
+                        <input type="text" pInputText id="title" formControlName="title" autofocus
+                            [ngClass]="{'is-invalid' : submitted && f.title.errors}" />
+                        <div *ngIf="submitted && f.title.errors" class="invalid-feedback">
+                            <div *ngIf="f.title.errors.required">
+                                Vui lòng nhập Tiêu đề
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="content">Nội dung</label>
+                        <editor apiKey="8j7su2hn4okmz32icrx43famupx36ujqadijpi0zzemwh2i5" [ngClass]="{'is-invalid' : submitted && f.content.errors}" id="content" formControlName="content"
+                            [init]="{
+                                base_url: '/tinymce',
+                                suffix: '.min',
+                                height: 500,
+                                menubar: true,
+                                plugins: [
+                                'advlist autolink lists link image charmap print preview anchor codesample',
+                                'searchreplace visualblocks code fullscreen image imagetools',
+                                'insertdatetime media table paste code help wordcount'
+                                ],
+                                codesample_languages: [
+                                { text: 'TypeScript', value: 'typescript' },
+                                { text: 'JavaScript', value: 'javascript' },
+                                { text: 'HTML/XML', value: 'markup' },
+                                { text: 'CSS', value: 'css' }
+                                ],
+                                toolbar:
+                                'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | link image media codesample'}">
+                        </editor>
+                        <div *ngIf="submitted && f.content.errors" class="invalid-feedback">
+                            <div *ngIf="f.content.errors.required">
+                                Vui lòng nhập Nội dung
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="link">Đường dẫn</label>
+                        <input type="text" pInputText id="link" formControlName="link"
+                            [ngClass]="{'is-invalid' : submitted && f.link.errors}" />
+                        <div *ngIf="submitted && f.link.errors" class="invalid-feedback">
+                            <div *ngIf="f.link.errors.required">
+                                Vui lòng nhập Đường dẫn
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="order">Thứ tự</label>
+                        <input type="number" pInputText id="order" formControlName="order" />
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="title">Hình ảnh</label>
+                        <p-fileUpload name="image"
+                            url="{{url + 'api/shared/upload-single-image?folder=slider&height=400&with=400'}}"
+                            (onUpload)="onUpload($event)" accept="image/*"
+                            [ngClass]="{'is-invalid' : submitted && isEmptyObject(selectedImage)}">
+                        </p-fileUpload>
+                        <div class="card">
+                            <p-table [value]="images" selectionMode="single" [(selection)]="selectedImage" dataKey="id"
+                                responsiveLayout="scroll" (onRowSelect)="onRowSelect($event)"
+                                (onRowUnselect)="onRowUnselect($event)" [paginator]="true" [rows]="5">
+                                <ng-template pTemplate="header">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Image</th>
+                                        <th>Hành động</th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-image>
+                                    <tr [pSelectableRow]="image">
+                                        <td>{{image.id}}</td>
+                                        <td>
+                                            <p-image src="{{url + image.image_path}}" alt="{{image.image}}" width="150"
+                                                [preview]="true"></p-image>
+                                        </td>
+                                        <td>
+                                            <button pButton pRipple icon="pi pi-trash"
+                                                class="p-button-rounded p-button-warning width-button-2_357r"
+                                                (click)="deleteImage(image)"></button>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+                        <div *ngIf="submitted && isEmptyObject(selectedImage)" class="invalid-feedback">
+                            <div *ngIf="isEmptyObject(selectedImage)">
+                                Vui lòng chọn Hình ảnh
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-field margin-top-10">
+                        <label for="status">Trạng thái</label>
+                        <br>
+                        <p-toggleButton onLabel="Bật" offLabel="Tắt"onIcon="pi pi-check" offIcon="pi pi-times"
+                            formControlName="status" [style]="{width: '100px'}"></p-toggleButton>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="footer">
+                    <button pButton pRipple label="Lưu" icon="pi pi-check" class="p-button-success"
+                        (click)="save()"></button>
+                    <button pButton pRipple label="Huỷ" icon="pi pi-times" class="p-button-danger"
+                        (click)="hideDialog()"></button>
+                </ng-template>
+            </p-dialog>
+        </form>
+    </section>
+</div>
